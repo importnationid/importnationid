@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImportNation.id - Sepatu Import Langsung dari Sumbernya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+
+        .nav-menu a:hover {
+            opacity: 0.8;
+        }
+
+        .admin-link {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+
+        .admin-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(255,107,0,0.9) 0%, rgba(255,140,0,0.9) 100%), 
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23222" width="1200" height="600"/><text x="50%" y="50%" font-size="80" fill="%23444" text-anchor="middle" dominant-baseline="middle">SNEAKERS</text></svg>');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .cta-button {
+            background: white;
+            color: #FF6B00;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #FF6B00;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: #FF6B00;
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        .about-section {
+            background: #f9f9f9;
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(255,107,0,0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #FF6B00;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .products-section {
+            background: white;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .category-card {
+            background: #f9f9f9;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            transform: scale(1.05);
+        }
+
+        .category-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: white;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .category-info {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .category-info h3 {
+            color: #FF6B00;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .category-info p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .stock-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .stock-badge.low {
+            background: #ffc107;
+        }
+
+        .stock-badge.out {
+            background: #dc3545;
+        }
+
+        .price-tag {
+            background: #FF6B00;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .steps-section {
+            background: #f9f9f9;
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .step {
+            text-align: center;
+            padding: 30px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .step-number {
+            background: #FF6B00;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 15px;
+        }
+
+        .faq-section {
+            background: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: #f9f9f9;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            font-weight: 600;
+            color: #FF6B00;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question:hover {
+            background: #fff;
+        }
+
+        .faq-answer {
+            padding: 0 20px 20px;
+            display: none;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, #FF6B00 0%, #FF8C00 100%);
+            color: white;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .contact-info {
+            text-align: center;
+        }
+
+        .contact-info h3 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .contact-item {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-item strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .contact-form h3 {
+            color: #FF6B00;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FF6B00;
+        }
+
+        .submit-button {
+            background: #FF6B00;
+            color: white;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .submit-button:hover {
+            background: #FF8C00;
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+        }
+
+        footer {
+            background: #222;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                gap: 1rem;
+            }
+
+            .nav-menu a {
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">ImportNation.id</div>
+            <ul class="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">Tentang</a></li>
+                <li><a href="#products">Produk</a></li>
+                <li><a href="#order">Cara Order</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#contact">Kontak</a></li>
+                <li><a href="admin.html" class="admin-link">🔐 Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <h1>ImportNation.id</h1>
+        <p>Sepatu Import Langsung dari Sumbernya</p>
+        <a href="https://wa.me/6282124855176" class="cta-button">Pesan Sekarang via WhatsApp</a>
+    </section>
+
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2 class="section-title">Tentang Kami</h2>
+            <div class="about-content">
+                <p>ImportNation.id adalah pilihan terpercaya untuk sepatu import berkualitas tinggi. Kami bekerja langsung dengan pabrik sepatu terkemuka di China, memastikan setiap produk yang sampai ke tangan Anda memiliki kualitas terbaik dengan harga yang jauh lebih terjangkau.</p>
+                <p style="margin-top: 20px;">Dengan pengalaman bertahun-tahun di industri ini, kami memahami betul apa yang dibutuhkan oleh konsumen Indonesia: kualitas premium, harga pabrik, dan pelayanan yang memuaskan. Setiap sepatu dipilih dan dikontrol langsung dari sumbernya.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <h2 class="section-title">Mengapa Pilih Kami?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Harga Pabrik Langsung</h3>
+                <p>Dapatkan harga terbaik karena kami bekerja langsung dengan pabrik, tanpa perantara yang membuat harga melambung</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✅</div>
+                <h3>Kualitas Terkontrol</h3>
+                <p>Setiap sepatu melalui quality control ketat di pabrik. Kami pastikan hanya produk terbaik yang sampai ke Anda</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚚</div>
+                <h3>Pengiriman Terpercaya</h3>
+                <p>Kirim ke seluruh Indonesia dengan packaging aman dan tracking jelas. Barang dijamin sampai dengan selamat</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🛡️</div>
+                <h3>Garansi & Support</h3>
+                <p>Kami berikan garansi untuk setiap pembelian dan customer support yang siap membantu kapan saja</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="products" class="products-section">
+        <div class="container">
+            <h2 class="section-title">Koleksi Produk Kami</h2>
+            <div id="productLoading" style="text-align: center; padding: 40px; color: #999;">
+                ⏳ Memuat produk dari database...
+            </div>
+            <div class="category-grid" id="productsGrid" style="display: none;"></div>
+            <div id="noProducts" style="display: none; text-align: center; padding: 40px;">
+                <p style="color: #999; font-size: 1.2rem;">Belum ada produk tersedia. Silakan hubungi admin.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="order" class="steps-section">
+        <div class="container">
+            <h2 class="section-title">Cara Order</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Pilih Produk</h3>
+                    <p>Browse koleksi kami dan pilih sepatu yang kamu suka</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Hubungi Kami</h3>
+                    <p>Chat via WhatsApp atau kirim form untuk info lebih lanjut</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Konfirmasi</h3>
+                    <p>Konfirmasi detail produk, ukuran, dan alamat pengiriman</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Pembayaran</h3>
+                    <p>Lakukan pembayaran sesuai invoice yang dikirim</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Terima Barang</h3>
+                    <p>Sepatu dikirim dan sampai di tangan kamu!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Pertanyaan yang Sering Diajukan</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Berapa lama pengiriman? <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Pengiriman dari gudang kami di Indonesia memakan waktu 3-7 hari kerja tergantung lokasi. Untuk pre-order langsung dari China, estimasi 2-3 minggu.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Metode pembayaran apa saja yang tersedia? <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Kami menerima transfer bank (BCA, Mandiri, BRI), e-wallet (OVO, GoPay, Dana), dan COD untuk area tertentu.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Apakah ada garansi? <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Ya! Kami memberikan garansi 7 hari untuk cacat produksi. Jika ada masalah dengan produk, hubungi kami dan kami akan bantu prosesnya.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Bagaimana dengan ukuran sepatu? <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Kami sediakan size chart lengkap untuk setiap produk. Tim kami juga siap membantu menentukan ukuran yang tepat sebelum pemesanan.
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        Apakah barang ready stock? <span>+</span>
+                    </div>
+                    <div class="faq-answer">
+                        Sebagian besar produk ready stock di gudang Indonesia. Untuk model tertentu yang belum tersedia, bisa pre-order dengan waktu tunggu 2-3 minggu.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <h2 class="section-title" style="color: white;">Hubungi Kami</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3>Informasi Kontak</h3>
+                    <div class="contact-item">
+                        <strong>📱 WhatsApp</strong>
+                        <a href="https://wa.me/6282124855176" style="color: white; text-decoration: none;">+62 821 2485 5176</a>
+                    </div>
+                    <div class="contact-item">
+                        <strong>📧 Email</strong>
+                        importnationid@gmail.com
+                    </div>
+                    <div class="contact-item">
+                        <strong>⏰ Jam Operasional</strong>
+                        Senin - Sabtu: 09.00 - 21.00 WIB<br>
+                        Minggu: 10.00 - 18.00 WIB
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3>Kirim Pesan</h3>
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" placeholder="Nama Lengkap" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" placeholder="Nomor WhatsApp" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea rows="5" placeholder="Pesan Anda" required></textarea>
+                        </div>
+                        <button type="submit" class="submit-button">Kirim Pesan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 ImportNation.id - Sepatu Import Langsung dari Sumbernya</p>
+    </footer>
+
+    <a href="https://wa.me/6282124855176" class="whatsapp-float" target="_blank">💬</a>
+
+    <script>
+        // Firebase Configuration - GANTI DENGAN CONFIG ANDA!
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        let database;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+            console.log('✅ Firebase connected');
+        } catch (error) {
+            console.log('⚠️ Firebase not configured, using localStorage fallback');
+        }
+
+        function loadProducts() {
+            const productsGrid = document.getElementById('productsGrid');
+            const productLoading = document.getElementById('productLoading');
+            const noProducts = document.getElementById('noProducts');
+
+            if (database) {
+                // Load from Firebase Realtime Database
+                database.ref('products').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const products = Object.values(data);
+                        renderProducts(products);
+                    } else {
+                        showNoProducts();
+                    }
+                });
+            } else {
+                // Fallback to localStorage
+                const stored = localStorage.getItem('importnation_products');
+                if (stored) {
+                    const products = JSON.parse(stored);
+                    renderProducts(products);
+                } else {
+                    showNoProducts();
+                }
+            }
+
+            function renderProducts(products) {
+                if (products.length > 0) {
+                    productLoading.style.display = 'none';
+                    productsGrid.style.display = 'grid';
+                    noProducts.style.display = 'none';
+                    productsGrid.innerHTML = '';
+
+                    products.forEach(product => {
+                        const stockClass = product.stock > 20 ? '' : product.stock > 0 ? 'low' : 'out';
+                        const stockText = product.stock > 20 ? 'Stok Tersedia' : product.stock > 0 ? `Sisa ${product.stock} pcs` : 'Stok Habis';
+
+                        const card = document.createElement('div');
+                        card.className = 'category-card';
+                        card.innerHTML = `
+                            <div class="category-image" style="background-image: url('${product.image}');"></div>
+                            <div class="category-info">
+                                <h3>${product.name}</h3>
+                                <p>${product.description || product.category}</p>
+                                <div class="stock-badge ${stockClass}">${stockText}</div>
+                                <div class="price-tag">Rp ${product.price.toLocaleString('id-ID')}</div>
+                            </div>
+                        `;
+
+                        card.addEventListener('click', () => {
+                            const message = `Halo! Saya tertarik dengan produk:\n\n*${product.name}*\nKategori: ${product.category}\nHarga: Rp ${product.price.toLocaleString('id-ID')}\n\nApakah produk ini masih tersedia?`;
+                            window.open(`https://wa.me/6282124855176?text=${encodeURIComponent(message)}`, '_blank');
+                        });
+
+                        productsGrid.appendChild(card);
+                    });
+                } else {
+                    showNoProducts();
+                }
+            }
+
+            function showNoProducts() {
+                productLoading.style.display = 'none';
+                noProducts.style.display = 'block';
+            }
+        }
+
+        loadProducts();
+
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            const allFaqs = document.querySelectorAll('.faq-item');
+            allFaqs.forEach(item => {
+                if (item !== faqItem) item.classList.remove('active');
+            });
+            faqItem.classList.toggle('active');
+        }
+
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = this.querySelector('input[type="text"]').value;
+            const email = this.querySelector('input[type="email"]').value;
+            const phone = this.querySelector('input[type="tel"]').value;
+            const message = this.querySelector('textarea').value;
+            const whatsappMessage = `Halo ImportNation.id!%0A%0ANama: ${name}%0AEmail: ${email}%0ANo. HP: ${phone}%0A%0APesan: ${message}`;
+            window.open(`https://wa.me/6282124855176?text=${whatsappMessage}`, '_blank');
+            this.reset();
+            alert('Terima kasih! Anda akan dialihkan ke WhatsApp.');
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
